@@ -4,14 +4,14 @@
  main-menu-screen%)
 
 (require
- "screen.rkt")
+ "screen.rkt"
+ "game-screen.rkt")
 
 (define main-menu-screen%
   (class screen%
     ; Always turn control over the game screen
     (define/override (update key-event)
-      ; TODO: (new game-screen%)
-      this)
+      (new game-screen%))
     
     ; Just draw a basic menu
     (define/override (draw canvas)
