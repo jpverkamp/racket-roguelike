@@ -1,11 +1,13 @@
 #lang racket
 
-(provide)
+(provide
+ make-gui)
 
 (require
  racket/gui
  racket/draw
- "ascii-canvas/ascii-canvas.rkt")
+ "ascii-canvas/ascii-canvas.rkt"
+ "main-menu-screen.rkt")
 
 ; Create a new GUI.
 (define gui%
@@ -26,14 +28,26 @@
            [width-in-characters width-in-chars]
            [height-in-characters height-in-chars]))
     
+    ; The active screen
+    (define active-screen (new main-menu-screen%))
+
     ; Make everything visible
     (send frame show #t)
+    
+    ; Do the initial drawing
+    (send canvas clear)
+    (send frame refresh)
+    (send active-screen draw canvas)
+    (send frame refresh)
     
     ; Finish initilization.
     (super-new)))
            
-(new gui% 
-     [width-in-chars 40]
-     [height-in-chars 24])
+; Create a new GUI 
+(define (make-gui wide high)
+  (new gui% 
+       [width-in-chars wide]
+       [height-in-chars high]))
    
+(make-gui 40 24)
     
