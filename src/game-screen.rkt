@@ -21,7 +21,7 @@
   (class screen%
     ; Store the player's state
     ; Use an imaginary number for a point
-    (define player (pt 0 0))
+    (define player (pt -11 -9))
     
     ; Get the contents of a given point, caching for future use
     ; Hash on (x y) => char
@@ -30,10 +30,14 @@
       (unless (hash-has-key? caves (list x y))
         (hash-set! caves (list x y)
           (let ()
-            (define wall? (> (simplex (* 0.1 x) (* 0.1 y)) 0))
+            (define wall?  (> (simplex (* 0.1 x) (* 0.1 y) 0)         0.0))
+            (define water? (> (simplex (* 0.1 x) 0         (* 0.1 y)) 0.5))
+            (define tree?  (> (simplex 0         (* 0.1 x) (* 0.1 y)) 0.5))
             (cond
-              [wall? 'wall]
-              [else  'empty]))))
+              [wall?  'wall]
+              [water? 'water]
+              [tree?  'tree]
+              [else   'empty]))))
       (hash-ref caves (list x y)))
     
     ; Process keyboard events
@@ -58,7 +62,9 @@
              [yi (in-range (send canvas get-height-in-characters))])
         (define x/y (recenter canvas (+ (pt xi yi) player)))
         (case (get-tile (pt-x x/y) (pt-y x/y))
-          [(wall) (send canvas write #\# xi yi)]))
+          [(wall) (send canvas write #\# xi yi)]
+          [(water) (send canvas write #\space xi yi "blue" "blue")]
+          [(tree) (send canvas write #\u0005 xi yi "green")]))
       
       ; Draw the player centered on the screen
       (let ([player (recenter canvas (pt 0 0))])
