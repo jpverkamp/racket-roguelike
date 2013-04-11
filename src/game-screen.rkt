@@ -21,7 +21,7 @@
   (class screen%
     ; Store the player's state
     ; Use an imaginary number for a point
-    (define player (pt -11 -9))
+    (define player (pt 0 0))
     
     ; Get the contents of a given point, caching for future use
     ; Hash on (x y) => char
@@ -29,26 +29,32 @@
     (define (get-tile x y)
       (unless (hash-has-key? caves (list x y))
         (hash-set! caves (list x y)
-          (let ()
-            (define wall?  (> (simplex (* 0.1 x) (* 0.1 y) 0)         0.0))
-            (define water? (> (simplex (* 0.1 x) 0         (* 0.1 y)) 0.5))
-            (define tree?  (> (simplex 0         (* 0.1 x) (* 0.1 y)) 0.5))
-            (cond
-              [wall?  'wall]
-              [water? 'water]
-              [tree?  'tree]
-              [else   'empty]))))
+                   (let ()
+                     (define wall?  (> (simplex (* 0.1 x) (* 0.1 y) 0)         0.0))
+                     (define water? (> (simplex (* 0.1 x) 0         (* 0.1 y)) 0.5))
+                     (define tree?  (> (simplex 0         (* 0.1 x) (* 0.1 y)) 0.5))
+                     (cond
+                       [wall?  'wall]
+                       [water? 'water]
+                       [tree?  'tree]
+                       [else   'empty]))))
       (hash-ref caves (list x y)))
     
     ; Process keyboard events
     (define/override (update key-event)
-      ; Move the player
       ; NOTE: Y axis is top down, X axis is left to right
+      
+      ; Find where we are attempting to go
+      (define target player)
       (case (send key-event get-key-code)
-        [(numpad8 #\w up)    (set! player (+ (pt  0 -1) player))]
-        [(numpad4 #\a left)  (set! player (+ (pt -1  0) player))]
-        [(numpad2 #\s down)  (set! player (+ (pt  0  1) player))]
-        [(numpad6 #\d right) (set! player (+ (pt  1  0) player))])
+        [(numpad8 #\w up)    (set! target (+ (pt  0  1) player))]
+        [(numpad4 #\a left)  (set! target (+ (pt  1  0) player))]
+        [(numpad2 #\s down)  (set! target (+ (pt  0 -1) player))]
+        [(numpad6 #\d right) (set! target (+ (pt -1  0) player))])
+      
+      ; Only move if it's open
+      (when (eq? 'empty (get-tile (pt-x target) (pt-y target)))
+        (set! player target))
       
       ; Keep the state
       this)
@@ -60,7 +66,7 @@
       ; Draw some caverns around the player
       (for* ([xi (in-range (send canvas get-width-in-characters))]
              [yi (in-range (send canvas get-height-in-characters))])
-        (define x/y (recenter canvas (+ (pt xi yi) player)))
+        (define x/y (recenter canvas (- player (pt xi yi))))
         (case (get-tile (pt-x x/y) (pt-y x/y))
           [(wall) (send canvas write #\# xi yi)]
           [(water) (send canvas write #\space xi yi "blue" "blue")]
