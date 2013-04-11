@@ -1,3 +1,6 @@
 [submodule "src/ascii-canvas"]
 	path = src/ascii-canvas
 	url = git://github.com/jpverkamp/ascii-canvas.git
+[submodule "src/noise"]
+	path = src/noise
+	url = git://github.com/jpverkamp/noise.git
