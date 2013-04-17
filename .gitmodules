@@ -4,3 +4,6 @@
 [submodule "src/noise"]
 	path = src/noise
 	url = git://github.com/jpverkamp/noise.git
+[submodule "src/thing"]
+	path = src/thing
+	url = git://github.com/jpverkamp/thing.git
