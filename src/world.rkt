@@ -2,10 +2,17 @@
 
 (provide world%)
 
-(require "noise/noise.rkt")
+(require 
+ "entities.rkt"
+ "noise/noise.rkt"
+ "thing/thing.rkt")
 
 (define world%
   (class object%
+    ; Store the player
+    (define player (make-thing entity))
+    (define/public (get-player) player)
+    
     ; Get the contents of a given point, caching for future use
     ; Hash on (x y) => char
     (define tiles (make-hash))

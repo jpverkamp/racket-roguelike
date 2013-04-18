@@ -15,10 +15,11 @@
   (class screen%
     ; Store the world, which contains player/map/etc
     (define world (new world%))
-    (define player (make-thing entity))
     
     ; Process keyboard events
     (define/override (update key-event)
+      (define player (send world get-player))
+      
       ; NOTE: Y axis is top down, X axis is left to right
       
       ; Find where we are attempting to go
@@ -38,6 +39,7 @@
     
     ; Draw the game itself.
     (define/override (draw canvas)
+      (define player (send world get-player))
       (send canvas clear)
       
       ; Draw some caverns around the player
