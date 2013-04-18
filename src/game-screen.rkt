@@ -31,8 +31,11 @@
         [(numpad6 #\d right) (set! target (+ (pt -1  0) (thing-get player 'location)))])
       
       ; Only move if it's open
-      (when (eq? 'empty (send world get-tile (pt-x target) (pt-y target)))
+      (when (thing-get (send world get-tile (pt-x target) (pt-y target)) 'walkable)
         (thing-set! player 'location target))
+
+      ; Update npcs
+      (send world update-npcs)
       
       ; Keep the state
       this)
@@ -46,15 +49,20 @@
       (for* ([xi (in-range (send canvas get-width-in-characters))]
              [yi (in-range (send canvas get-height-in-characters))])
         (define x/y (recenter canvas (- (thing-get player 'location) (pt xi yi))))
-        (case (send world get-tile (pt-x x/y) (pt-y x/y))
-          [(wall) (send canvas write #\# xi yi)]
-          [(water) (send canvas write #\space xi yi "blue" "blue")]
-          [(tree) (send canvas write #\u0005 xi yi "green")]))
+        (define tile (send world get-tile (pt-x x/y) (pt-y x/y)))
+        (send canvas write
+              (thing-get tile 'character)
+              xi
+              yi
+              (thing-get tile 'color)))
       
       ; Draw the player centered on the screen
       (let ([draw-@ (recenter canvas (pt 0 0))])
         (send canvas write #\@ (pt-x draw-@) (pt-y draw-@)))
       
+      ; Draw the npcs
+      (send world draw-npcs canvas)
+
       ; Debug: Show the player location
       (send canvas write-string
             (format "~a, ~a" 
