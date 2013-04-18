@@ -7,15 +7,14 @@
  "point.rkt"
  "screen.rkt"
  "noise/noise.rkt"
- "thing/thing.rkt")
+ "thing/thing.rkt"
+ "entities.rkt")
 
 (define game-screen%
   (class screen%
     ; Store the player's state
     ; Use an imaginary number for a point
-    (define player 
-      (make-thing
-       [location (pt 0 0)]))
+    (define-thing player entity)
     
     ; Get the contents of a given point, caching for future use
     ; Hash on (x y) => char
