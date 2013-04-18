@@ -17,23 +17,34 @@
     (define world (new world%))
     
     ; Process keyboard events
+    (define game-over #f)
     (define/override (update key-event)
-      (define player (send world get-player))
-      
-      ; NOTE: Y axis is top down, X axis is left to right
-      
-      ; Try to move the player
-      (case (send key-event get-key-code)
-        [(numpad8 #\w up)    (send world try-move player (+ (pt  0  1) (thing-get player 'location)))]
-        [(numpad4 #\a left)  (send world try-move player (+ (pt  1  0) (thing-get player 'location)))]
-        [(numpad2 #\s down)  (send world try-move player (+ (pt  0 -1) (thing-get player 'location)))]
-        [(numpad6 #\d right) (send world try-move player (+ (pt -1  0) (thing-get player 'location)))])
-      
-      ; Update npcs
-      (send world update-npcs)
-      
-      ; Keep the state
-      this)
+      (cond
+        [game-over (new game-screen%)]
+        [else
+         (define player (send world get-player))
+         
+         ; NOTE: Y axis is top down, X axis is left to right
+         
+         ; Try to move the player
+         (case (send key-event get-key-code)
+           [(numpad8 #\w up)    (send world try-move player (+ (pt  0  1) (thing-get player 'location)))]
+           [(numpad4 #\a left)  (send world try-move player (+ (pt  1  0) (thing-get player 'location)))]
+           [(numpad2 #\s down)  (send world try-move player (+ (pt  0 -1) (thing-get player 'location)))]
+           [(numpad6 #\d right) (send world try-move player (+ (pt -1  0) (thing-get player 'location)))])
+         
+         ; Update npcs
+         (send world update-npcs)
+         
+         ; Check if the player is dead
+         ; If so, tell the player they lost
+         ; Otherwise, keep on the current screen
+         (when (<= (thing-get player 'health) 0)
+           (send this log "You lose!")
+           (send this log "Press any key to continue.")
+           (set! game-over #t))
+         
+         this]))
     
     ; Draw the game itself.
     (define/override (draw canvas)

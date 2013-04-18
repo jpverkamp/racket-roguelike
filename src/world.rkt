@@ -131,8 +131,17 @@
     (define npcs '())
     
     (define/public (update-npcs)
+      ; Allow each to move
       (for ([npc (in-list npcs)])
-        (thing-call npc 'act npc this)))
+        (thing-call npc 'act npc this))
+      ; Check for (and remove) any dead npcs
+      (set! npcs
+            (filter 
+             (lambda (npc)
+               (when (<= (thing-get npc 'health) 0)
+                 (send this log (format "~a has died" (thing-get npc 'name))))
+               (> (thing-get npc 'health) 0))
+             npcs)))
     
     (define/public (draw-npcs canvas)
       (for ([npc (in-list npcs)])
