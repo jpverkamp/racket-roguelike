@@ -41,6 +41,6 @@
 (define random-enemies
   (vector
    (make-thing wandering-enemy
-    [name "rat"]
-    [character #\r])))
+     [name "rat"]
+     [character #\r])))
     

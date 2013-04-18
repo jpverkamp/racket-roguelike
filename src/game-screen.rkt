@@ -40,8 +40,8 @@
          ; If so, tell the player they lost
          ; Otherwise, keep on the current screen
          (when (<= (thing-get player 'health) 0)
-           (send this log "You lose!")
-           (send this log "Press any key to continue.")
+           (send world log "You lose!")
+           (send world log "Press any key to continue.")
            (set! game-over #t))
          
          this]))
