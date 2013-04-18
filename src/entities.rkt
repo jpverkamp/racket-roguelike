@@ -13,10 +13,7 @@
 (define-thing entity
   [character #\x]
   [color "white"]
-  [location (pt 0 0)]
-  [attack 10]
-  [defense 10]
-  [health 10])
+  [location (pt 0 0)])
 
 ; An enemy must have an act method
 ; It should mutate the world with it's updated state
@@ -24,8 +21,10 @@
 (define-thing enemy entity
   [name "enemy"]
   [color "gray"]
-  [(act world)
-   (void)])
+  [attack 10]
+  [defense 10]
+  [health 10]
+  [(act me world) (void)])
 
 ; A wandering enemy randomly chooses a neighboring open square
 (define-thing wandering-enemy enemy
@@ -42,5 +41,10 @@
   (vector
    (make-thing wandering-enemy
      [name "rat"]
-     [character #\r])))
+     [character #\r])
+   (make-thing wandering-enemy
+     [name "doom"]
+     [character #\u0001]
+     [color "red"]
+     [attack 100])))
     
