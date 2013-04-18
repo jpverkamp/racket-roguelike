@@ -104,15 +104,23 @@
            
            ; I attack them
            (define other-damaged
-             (max 0 (- (random (min 1 (thing-get entity 'attack)))
-                       (random (min 1 (thing-get other 'defense))))))
+             (max 0 (- (random (max 1 (thing-get entity 'attack)))
+                       (random (max 1 (thing-get other 'defense))))))
            (thing-set! other 'health (- (thing-get other 'health) other-damaged))
+           (printf "~s takes ~s damage\n"
+                   (thing-get other 'location)
+                   other-damaged)
            
            ; They attack me
            (define entity-damaged
-             (max 0 (- (random (min 1 (thing-get other 'attack)))
-                       (random (min 1 (thing-get entity 'defense))))))
-           (thing-set! entity 'health (- (thing-get entity 'health) entity-damaged)))]))
+             (max 0 (- (random (max 1 (thing-get other 'attack)))
+                       (random (max 1 (thing-get entity 'defense))))))
+           (thing-set! entity 'health (- (thing-get entity 'health) entity-damaged))
+           
+           (printf "~s takes ~s damage\n"
+                   (thing-get entity 'location)
+                   entity-damaged)
+           )]))
     
     ; Store a list of non-player entities
     (define npcs '())
