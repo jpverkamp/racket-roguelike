@@ -32,7 +32,7 @@
 (define world%
   (class object%
     ; Store the player
-    (define player (make-thing entity))
+    (define player (make-thing entity [health 10]))
     (define/public (get-player) player)
     
     ; Get the contents of a given point, caching for future use

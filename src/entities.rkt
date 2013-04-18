@@ -16,7 +16,7 @@
   [location (pt 0 0)]
   [attack 1]
   [defense 1]
-  [health 10])
+  [health 1])
 
 ; An enemy must have an act method
 ; It should mutate the world with it's updated state

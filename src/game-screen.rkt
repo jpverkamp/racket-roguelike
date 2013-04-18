@@ -62,7 +62,15 @@
       
       ; Draw the npcs
       (send world draw-npcs canvas)
-
+      
+      ; Show current player statistics
+      (for ([i (in-naturals)]
+            [key (in-list '(health defense attack))])
+        (send canvas write-string
+              (format "~a: ~a" key (thing-get player key))
+              1 (- (send canvas get-height-in-characters) i 2)
+              "green"))
+      
       ; Debug: Show the player location
       (send canvas write-string
             (format "~a, ~a" 
