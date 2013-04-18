@@ -60,18 +60,18 @@
       
       ; Show current player statistics
       (for ([i (in-naturals)]
-            [key (in-list '(health defense attack))])
+            [key (in-list '(attack defense health))])
         (send canvas write-string
               (format "~a: ~a" key (thing-get player key))
-              1 (- (send canvas get-height-in-characters) i 2)
+              1 (+ i 1)
               "green"))
       
-      ; Debug: Show the player location
-      (send canvas write-string
-            (format "~a, ~a" 
-                    (pt-x (thing-get player 'location)) 
-                    (pt-y (thing-get player 'location)))
-            1 1
-            "green"))
+      ; Draw recent log messages
+      (for ([i (in-naturals)]
+            [msg (in-list (send world get-log 3))])
+        (send canvas write-string
+              msg
+              1 (- (send canvas get-height-in-characters) i 2)
+              "green")))
     
     (super-new)))

@@ -34,10 +34,26 @@
     ; Store the player
     (define player 
       (make-thing entity 
+        [name "player"]
         [attack 10]
         [defense 10]
         [health 100]))
     (define/public (get-player) player)
+
+    ; Log messages to display to the player
+    (define log-messages '())
+
+    (define/public (log msg)
+      (set! log-messages (cons msg log-messages)))
+    
+    (define/public (get-log [count 1])
+      (let loop ([i 0] [msgs log-messages])
+        (cond
+          [(= i count) '()]
+          [(null? msgs) (cons "" (loop (+ i 1) msgs))]
+          [else
+           (cons (car msgs)
+                 (loop (+ i 1) (cdr msgs)))])))
     
     ; Get the contents of a given point, caching for future use
     ; Hash on (x y) => char
@@ -98,29 +114,18 @@
         ; damage = max(0, rand(min(1, attack)) - rand(min(1, defense)))
         [else
          (for ([other (in-list others)])
-           (printf "~s is fighting ~s\n"
-                   (thing-get entity 'location)
-                   (thing-get other 'location))
-           
-           ; I attack them
-           (define other-damaged
+           ; Do the damage
+           (define damage
              (max 0 (- (random (max 1 (thing-get entity 'attack)))
                        (random (max 1 (thing-get other 'defense))))))
-           (thing-set! other 'health (- (thing-get other 'health) other-damaged))
-           (printf "~s takes ~s damage\n"
-                   (thing-get other 'location)
-                   other-damaged)
+           (thing-set! other 'health (- (thing-get other 'health) damage))
            
-           ; They attack me
-           (define entity-damaged
-             (max 0 (- (random (max 1 (thing-get other 'attack)))
-                       (random (max 1 (thing-get entity 'defense))))))
-           (thing-set! entity 'health (- (thing-get entity 'health) entity-damaged))
-           
-           (printf "~s takes ~s damage\n"
-                   (thing-get entity 'location)
-                   entity-damaged)
-           )]))
+           ; Log a message
+           (send this log
+                 (format "~a attacked ~a, did ~a damage"
+                         (thing-get entity 'name)
+                         (thing-get other 'name)
+                         damage)))]))
     
     ; Store a list of non-player entities
     (define npcs '())
