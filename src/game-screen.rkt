@@ -8,30 +8,14 @@
  "screen.rkt"
  "noise/noise.rkt"
  "thing/thing.rkt"
- "entities.rkt")
+ "entities.rkt"
+ "world.rkt")
 
 (define game-screen%
   (class screen%
-    ; Store the player's state
-    ; Use an imaginary number for a point
-    (define-thing player entity)
-    
-    ; Get the contents of a given point, caching for future use
-    ; Hash on (x y) => char
-    (define caves (make-hash))
-    (define (get-tile x y)
-      (unless (hash-has-key? caves (list x y))
-        (hash-set! caves (list x y)
-                   (let ()
-                     (define wall?  (> (simplex (* 0.1 x) (* 0.1 y) 0)         0.0))
-                     (define water? (> (simplex (* 0.1 x) 0         (* 0.1 y)) 0.5))
-                     (define tree?  (> (simplex 0         (* 0.1 x) (* 0.1 y)) 0.5))
-                     (cond
-                       [wall?  'wall]
-                       [water? 'water]
-                       [tree?  'tree]
-                       [else   'empty]))))
-      (hash-ref caves (list x y)))
+    ; Store the world, which contains player/map/etc
+    (define world (new world%))
+    (define player (make-thing entity))
     
     ; Process keyboard events
     (define/override (update key-event)
@@ -46,7 +30,7 @@
         [(numpad6 #\d right) (set! target (+ (pt -1  0) (thing-get player 'location)))])
       
       ; Only move if it's open
-      (when (eq? 'empty (get-tile (pt-x target) (pt-y target)))
+      (when (eq? 'empty (send world get-tile (pt-x target) (pt-y target)))
         (thing-set! player 'location target))
       
       ; Keep the state
@@ -60,7 +44,7 @@
       (for* ([xi (in-range (send canvas get-width-in-characters))]
              [yi (in-range (send canvas get-height-in-characters))])
         (define x/y (recenter canvas (- (thing-get player 'location) (pt xi yi))))
-        (case (get-tile (pt-x x/y) (pt-y x/y))
+        (case (send world get-tile (pt-x x/y) (pt-y x/y))
           [(wall) (send canvas write #\# xi yi)]
           [(water) (send canvas write #\space xi yi "blue" "blue")]
           [(tree) (send canvas write #\u0005 xi yi "green")]))

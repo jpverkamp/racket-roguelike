@@ -15,5 +15,3 @@
   [attack 1]
   [defense 1]
   [health 10])
-
-  
