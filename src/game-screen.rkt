@@ -22,18 +22,13 @@
       
       ; NOTE: Y axis is top down, X axis is left to right
       
-      ; Find where we are attempting to go
-      (define target (thing-get player 'location))
+      ; Try to move the player
       (case (send key-event get-key-code)
-        [(numpad8 #\w up)    (set! target (+ (pt  0  1) (thing-get player 'location)))]
-        [(numpad4 #\a left)  (set! target (+ (pt  1  0) (thing-get player 'location)))]
-        [(numpad2 #\s down)  (set! target (+ (pt  0 -1) (thing-get player 'location)))]
-        [(numpad6 #\d right) (set! target (+ (pt -1  0) (thing-get player 'location)))])
+        [(numpad8 #\w up)    (send world try-move player (+ (pt  0  1) (thing-get player 'location)))]
+        [(numpad4 #\a left)  (send world try-move player (+ (pt  1  0) (thing-get player 'location)))]
+        [(numpad2 #\s down)  (send world try-move player (+ (pt  0 -1) (thing-get player 'location)))]
+        [(numpad6 #\d right) (send world try-move player (+ (pt -1  0) (thing-get player 'location)))])
       
-      ; Only move if it's open
-      (when (thing-get (send world get-tile (pt-x target) (pt-y target)) 'walkable)
-        (thing-set! player 'location target))
-
       ; Update npcs
       (send world update-npcs)
       

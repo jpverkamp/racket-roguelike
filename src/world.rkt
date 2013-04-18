@@ -32,7 +32,11 @@
 (define world%
   (class object%
     ; Store the player
-    (define player (make-thing entity [health 10]))
+    (define player 
+      (make-thing entity 
+        [attack 10]
+        [defense 10]
+        [health 100]))
     (define/public (get-player) player)
     
     ; Get the contents of a given point, caching for future use
@@ -53,7 +57,6 @@
               [tree?  tree]
               [else   empty])))
         (hash-set! tiles (list x y) new-tile)
-
         
         ; Sometimes, generate a new enemy
         ; Only if the new tile is walkable
@@ -72,6 +75,44 @@
         
       ; Return the tile (newly generated or not)
       (hash-ref tiles (list x y)))
+    
+    ; Try to move an entity to a given location
+    (define/public (try-move entity target)
+      (define tile (send this get-tile (pt-x target) (pt-y target)))
+      (define others
+        (filter
+         ; Only get ones at the target location that aren't me
+         (lambda (thing) (and (not (eqv? thing entity))
+                              (= (thing-get thing 'location) target)))
+         ; Include the player and all npcs
+         (cons player npcs)))
+      
+      (cond
+        ; If it's not walkable, do nothing
+        [(not (thing-get tile 'walkable))
+         (void)]
+        ; If it's walkable and not occupied, update the location
+        [(null? others)
+         (thing-set! entity 'location target)]
+        ; If it's walkable and occupied, attack the occupant and don't move
+        ; damage = max(0, rand(min(1, attack)) - rand(min(1, defense)))
+        [else
+         (for ([other (in-list others)])
+           (printf "~s is fighting ~s\n"
+                   (thing-get entity 'location)
+                   (thing-get other 'location))
+           
+           ; I attack them
+           (define other-damaged
+             (max 0 (- (random (min 1 (thing-get entity 'attack)))
+                       (random (min 1 (thing-get other 'defense))))))
+           (thing-set! other 'health (- (thing-get other 'health) other-damaged))
+           
+           ; They attack me
+           (define entity-damaged
+             (max 0 (- (random (min 1 (thing-get other 'attack)))
+                       (random (min 1 (thing-get entity 'defense))))))
+           (thing-set! entity 'health (- (thing-get entity 'health) entity-damaged)))]))
     
     ; Store a list of non-player entities
     (define npcs '())
