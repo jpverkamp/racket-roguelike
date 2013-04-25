@@ -102,7 +102,8 @@
    (make-thing exploding-enemy
      [name "bomb"]
      [color "white"]
-     [character #\O])
+     [character #\O]
+     [attack 50])
    (make-thing fleeing-enemy
      [name "rat"]
      [character #\r])
