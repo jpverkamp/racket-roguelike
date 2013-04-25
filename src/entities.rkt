@@ -73,10 +73,36 @@
      [else
       (thing-call wandering-enemy 'act me world)])])
       
+; An exploding enemy blows up whenever the player gets close to them
+; Otherwise, they cannot move or attack (by default)
+(define-thing exploding-enemy enemy
+  [(act me world)
+   (define distance-to-player
+     (distance (thing-get (send world get-player) 'location)
+               (thing-get me 'location)))
+   (when (<= distance-to-player 1.5)
+     ; Log message
+     (send world log (format "~a explodes violently" (thing-get me 'name)))
 
+     ; Damage neighbors
+     (for* ([xd (in-range -1 2)]
+            [yd (in-range -1 2)])
+       (for ([other (send world get-entities 
+                           (+ (thing-get me 'location)
+                              (pt xd yd)))])
+         (unless (eqv? me other)
+           (send world attack me other))))
+
+     ; Destroy self
+     (thing-set! me 'health -1))])
+   
 ; A list of random enemies that we can generate
 (define random-enemies
   (vector
+   (make-thing exploding-enemy
+     [name "bomb"]
+     [color "white"]
+     [character #\O])
    (make-thing fleeing-enemy
      [name "rat"]
      [character #\r])
@@ -85,5 +111,14 @@
      [character #\g]
      [color "orange"]
      [attack 15]
-     [defense 5])))
+     [defense 5])
+   (make-thing seeking-enemy
+     [name "bomber"]
+     [character #\b]
+     [color "orange"]
+     [attack 15]
+     [defense 5]
+     [(act me world)
+      (thing-call seeking-enemy 'act me world)
+      (thing-call exploding-enemy 'act me world)])))
     

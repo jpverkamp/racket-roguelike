@@ -92,6 +92,21 @@
       ; Return the tile (newly generated or not)
       (hash-ref tiles (list x y)))
     
+    ; One entity attacks another
+    (define/public (attack entity other)
+      ; Do the damage
+      (define damage
+        (max 0 (- (random (max 1 (thing-get entity 'attack)))
+                  (random (max 1 (thing-get other 'defense))))))
+      (thing-set! other 'health (- (thing-get other 'health) damage))
+      
+      ; Log a message
+      (send this log
+            (format "~a attacked ~a, did ~a damage"
+                    (thing-get entity 'name)
+                    (thing-get other 'name)
+                    damage)))
+      
     ; Try to move an entity to a given location
     (define/public (try-move entity target)
       (define tile (send this get-tile (pt-x target) (pt-y target)))
@@ -114,18 +129,13 @@
         ; damage = max(0, rand(min(1, attack)) - rand(min(1, defense)))
         [else
          (for ([other (in-list others)])
-           ; Do the damage
-           (define damage
-             (max 0 (- (random (max 1 (thing-get entity 'attack)))
-                       (random (max 1 (thing-get other 'defense))))))
-           (thing-set! other 'health (- (thing-get other 'health) damage))
-           
-           ; Log a message
-           (send this log
-                 (format "~a attacked ~a, did ~a damage"
-                         (thing-get entity 'name)
-                         (thing-get other 'name)
-                         damage)))]))
+           (send this attack entity other))]))
+    
+    ; Get a list of all entities by location
+    (define/public (get-entities p)
+      (for/list ([entity (cons player npcs)]
+                 #:when (= p (thing-get entity 'location)))
+        entity))
     
     ; Store a list of non-player entities
     (define npcs '())
