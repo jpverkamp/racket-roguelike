@@ -41,10 +41,5 @@
   (vector
    (make-thing wandering-enemy
      [name "rat"]
-     [character #\r])
-   (make-thing wandering-enemy
-     [name "doom"]
-     [character #\u0001]
-     [color "red"]
-     [attack 100])))
+     [character #\r])))
     
