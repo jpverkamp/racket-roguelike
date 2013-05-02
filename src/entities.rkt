@@ -10,10 +10,15 @@
 ; - a location on the map
 ; - attack and defense strengths
 ; - hitpoints
+; - an inventory
 (define-thing entity
   [character #\x]
   [color "white"]
-  [location (pt 0 0)])
+  [location (pt 0 0)]
+  [inventory '()]
+  [(pick-up me item)
+   (thing-set! me 'inventory
+               (cons item (thing-get me 'inventory)))])
 
 ; An enemy must have an act method
 ; It should mutate the world with it's updated state
@@ -96,23 +101,27 @@
      ; Destroy self
      (thing-set! me 'health -1))])
    
-; A list of random enemies that we can generate
-(define random-enemies
+; Actual enemy definitions
+(define *enemies*
   (vector
    (make-thing exploding-enemy
      [name "bomb"]
      [color "white"]
      [character #\O]
      [attack 50])
+
    (make-thing fleeing-enemy
      [name "rat"]
-     [character #\r])
+     [character #\r]
+     [color "brown"])
+
    (make-thing seeking-enemy
      [name "goblin"]
      [character #\g]
      [color "orange"]
      [attack 15]
      [defense 5])
+
    (make-thing seeking-enemy
      [name "bomber"]
      [character #\b]
@@ -122,4 +131,3 @@
      [(act me world)
       (thing-call seeking-enemy 'act me world)
       (thing-call exploding-enemy 'act me world)])))
-    

@@ -5,14 +5,25 @@
 (require 
  "point.rkt"
  "entities.rkt"
+ "items.rkt"
  "noise/noise.rkt"
  "thing/thing.rkt")
+
+; Choose a random element from a vector
+(define (vector-choose-random v)
+  (vector-ref v (random (vector-length v))))
+
+; Choose a random element from a vector with a falling likelihood
+; TODO: Fix this
+(define (vector-choose-biased v)
+  (vector-choose-random v))
 
 ; Define tile types
 (define-thing tile
   [walkable #f]
   [character #\space]
-  [color "black"])
+  [color "black"]
+  [items '()])
 
 (define-thing empty tile
   [walkable #t])
@@ -68,10 +79,10 @@
             (define water? (> (simplex (* 0.1 x) 0         (* 0.1 y)) 0.5))
             (define tree?  (> (simplex 0         (* 0.1 x) (* 0.1 y)) 0.5))
             (cond
-              [wall?  wall]
-              [water? water]
-              [tree?  tree]
-              [else   empty])))
+              [wall?  (make-thing wall)]
+              [water? (make-thing water)]
+              [tree?  (make-thing tree)]
+              [else   (make-thing empty)])))
         (hash-set! tiles (list x y) new-tile)
         
         ; Sometimes, generate a new enemy
@@ -79,15 +90,21 @@
         (when (and (thing-get new-tile 'walkable)
                    (< (random 100) 1))
           (define new-thing 
-            (make-thing 
-             ; Base it off a randomly chosen enemy
-             (vector-ref random-enemies 
-                         (random (vector-length random-enemies)))
-             ; This is it's location
-             [location (pt x y)]))
+            (let ([base (vector-choose-random *enemies*)])
+              (make-thing base
+                [location (pt x y)])))
           
           ; Store it in the npc list
-          (set! npcs (cons new-thing npcs))))
+          (set! npcs (cons new-thing npcs)))
+        
+        ; Sometimes even more rarely, generate some sort of treasure
+        (when (and (thing-get new-tile 'walkable)
+                   (< (random 1000) 1))
+          (define new-item
+            (let ([base (vector-choose-biased (vector-choose-random *all-items*))])
+              (make-thing base)))
+          
+          (thing-set! new-tile 'items (cons new-item (thing-get new-tile 'items)))))
         
       ; Return the tile (newly generated or not)
       (hash-ref tiles (list x y)))
@@ -123,8 +140,37 @@
         [(not (thing-get tile 'walkable))
          (void)]
         ; If it's walkable and not occupied, update the location
+        ; Also, pick up any items there, exchanging if types match
         [(null? others)
-         (thing-set! entity 'location target)]
+         (thing-set! entity 'location target)
+         
+         (define (pick-up item)
+           (thing-set! entity 'inventory (cons item (thing-get entity 'inventory)))
+           (thing-set! tile 'items (remove item (thing-get tile 'items)))
+           (thing-call item 'on-pick-up item entity this))
+         
+         (define (drop item)
+           (thing-set! entity 'inventory (remove item (thing-get entity 'inventory)))
+           (thing-set! tile 'items (cons item (thing-get tile 'items)))
+           (thing-call item 'on-drop item entity this))
+         
+         (define (consume item)
+           (thing-set! tile 'items (remove item (thing-get tile 'items)))
+           (thing-call item 'on-pick-up item entity this))
+         
+         ; For each item on the ground
+         (for ([item (in-list (thing-get tile 'items))])
+           ; Remove same typed items from the inventory
+           (for ([in-inv (in-list (thing-get entity 'inventory))]
+                 #:when (eq? (thing-get item 'category)
+                             (thing-get in-inv 'category)))
+             (drop in-inv))
+           
+           ; Pick up or consume the item
+           (if (thing-get item 'consumable)
+               (consume item)
+               (pick-up item)))]
+
         ; If it's walkable and occupied, attack the occupant and don't move
         ; damage = max(0, rand(min(1, attack)) - rand(min(1, defense)))
         [else

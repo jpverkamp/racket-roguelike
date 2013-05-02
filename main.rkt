@@ -2,4 +2,4 @@
 
 (require "src/gui.rkt")
 
-(make-gui 40 24)
+(make-gui 60 36)
