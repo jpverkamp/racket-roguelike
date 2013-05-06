@@ -34,10 +34,10 @@
 
 (define *armors*
   (vector
-   (make-thing armor [name "leather"] [color "brown"]  [defense 1])
-   (make-thing armor [name "chain"]   [color "gray"]   [defense 2])
-   (make-thing armor [name "plate"]   [color "white"]  [defense 3])
-   (make-thing armor [name "enchanted"]   [color "purple"] [defense 5])))
+   (make-thing armor [name "leather"]   [color "brown"]  [defense 1])
+   (make-thing armor [name "chain"]     [color "gray"]   [defense 2])
+   (make-thing armor [name "plate"]     [color "white"]  [defense 3])
+   (make-thing armor [name "enchanted"] [color "purple"] [defense 5])))
 
 ; Weapons increase attack
 (define-thing weapon item

@@ -15,10 +15,7 @@
   [character #\x]
   [color "white"]
   [location (pt 0 0)]
-  [inventory '()]
-  [(pick-up me item)
-   (thing-set! me 'inventory
-               (cons item (thing-get me 'inventory)))])
+  [inventory '()])
 
 ; An enemy must have an act method
 ; It should mutate the world with it's updated state
