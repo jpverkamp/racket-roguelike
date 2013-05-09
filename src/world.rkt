@@ -73,7 +73,8 @@
                               (= (thing-get thing 'location) target)))
          ; Include the player and all npcs
          (cons player (get-npcs))))
-      
+       
+      ; Otherwise, deal with moving
       (cond
         ; If it's not walkable, do nothing
         [(not (thing-get tile 'walkable))
