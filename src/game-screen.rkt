@@ -95,7 +95,9 @@
         (send canvas write-string
               (format "~a: ~a" 
                       (thing-get item 'category)
-                      (thing-get item 'name))
+                      (if (thing-get item 'stackable)
+                          (thing-get item 'quantity)
+                          (thing-get item 'name)))
               1 (+ i 5)
               (thing-get item 'color)))
       

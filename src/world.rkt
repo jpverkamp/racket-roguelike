@@ -144,32 +144,65 @@
         [(null? others)
          (thing-set! entity 'location target)
          
+         ; Pick up an item from the ground
          (define (pick-up item)
+           (send this log (format "~a picked up ~a" (thing-get entity 'name) (thing-get item 'name)))
            (thing-set! entity 'inventory (cons item (thing-get entity 'inventory)))
            (thing-set! tile 'items (remove item (thing-get tile 'items)))
            (thing-call item 'on-pick-up item entity this))
          
+         ; Drop an item from the inventory
          (define (drop item)
+           (send this log (format "~a dropped ~a" (thing-get entity 'name) (thing-get item 'name)))
            (thing-set! entity 'inventory (remove item (thing-get entity 'inventory)))
            (thing-set! tile 'items (cons item (thing-get tile 'items)))
            (thing-call item 'on-drop item entity this))
          
+         ; Consume a consumable item from the ground
          (define (consume item)
+           (send this log (format "~a consumed ~a" (thing-get entity 'name) (thing-get item 'name)))
            (thing-set! tile 'items (remove item (thing-get tile 'items)))
            (thing-call item 'on-pick-up item entity this))
+         
+         ; Add a stackable item from the ground
+         (define (stack item)
+           (send this log (format "~a picked up ~a worth ~a ~a" 
+                                  (thing-get entity 'name) 
+                                  (thing-get item 'name)
+                                  (thing-get item 'quantity)
+                                  (thing-get item 'category)))
+           (thing-set! tile 'items (remove item (thing-get tile 'items)))
+           (thing-call item 'on-pick-up item entity this)
+        
+           ; Break out if we successfully stack
+           (let/ec break
+             (for ([in-inv (in-list (thing-get entity 'inventory))]
+                   #:when (eq? (thing-get item 'category)
+                               (thing-get in-inv 'category)))
+               (thing-set! in-inv 'quantity (+ (thing-get item 'quantity)
+                                               (thing-get in-inv 'quantity)))
+               (break))
+             
+             ; If we didn't stack, add it to the inventory
+             (thing-set! entity 'inventory (cons item (thing-get entity 'inventory)))))
          
          ; For each item on the ground
          (for ([item (in-list (thing-get tile 'items))])
            ; Remove same typed items from the inventory
-           (for ([in-inv (in-list (thing-get entity 'inventory))]
-                 #:when (eq? (thing-get item 'category)
-                             (thing-get in-inv 'category)))
-             (drop in-inv))
+           (unless (thing-get item 'stackable)
+             (for ([in-inv (in-list (thing-get entity 'inventory))]
+                   #:when (eq? (thing-get item 'category)
+                               (thing-get in-inv 'category)))
+               (drop in-inv)))
            
            ; Pick up or consume the item
-           (if (thing-get item 'consumable)
-               (consume item)
-               (pick-up item)))]
+           (cond
+             [(thing-get item 'stackable)
+              (stack item)]
+             [(thing-get item 'consumable)
+              (consume item)]
+             [else
+              (pick-up item)]))]
 
         ; If it's walkable and occupied, attack the occupant and don't move
         ; damage = max(0, rand(min(1, attack)) - rand(min(1, defense)))
