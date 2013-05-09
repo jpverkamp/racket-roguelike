@@ -38,7 +38,7 @@
            [(numpad9)           (send world try-move player (+ (pt -1  1) (thing-get player 'location)))])
          
          ; Update npcs
-         (send world update-npcs)
+         (send world update)
          
          ; Check if the player is dead
          ; If so, tell the player they lost
@@ -59,7 +59,7 @@
       (for* ([xi (in-range (send canvas get-width-in-characters))]
              [yi (in-range (send canvas get-height-in-characters))])
         (define x/y (recenter canvas (- (thing-get player 'location) (pt xi yi))))
-        (define tile (send world get-tile (pt-x x/y) (pt-y x/y)))
+        (define tile (send world tile-at (pt-x x/y) (pt-y x/y)))
         (cond
           [(null? (thing-get tile 'items '()))
            (send canvas write

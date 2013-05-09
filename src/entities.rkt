@@ -99,7 +99,7 @@
      (thing-set! me 'health -1))])
    
 ; Actual enemy definitions
-(define *enemies*
+(define *entities*
   (vector
    (make-thing exploding-enemy
      [name "bomb"]
