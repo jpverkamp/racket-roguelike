@@ -159,7 +159,7 @@
 
 ; ===== Tile generation routines =====
 
-; The surface level with grawss, water, and trees
+; The surface level with grass, water, and trees
 (define (surface seed x y)
   (define water? (> (simplex (* 0.1 x) seed      (* 0.1 y)) 0.5))
   (define tree?  (> (simplex seed      (* 0.1 x) (* 0.1 y)) 0.5))
