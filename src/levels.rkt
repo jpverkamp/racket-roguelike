@@ -86,11 +86,9 @@
   (unless (hash-has-key? current-level (pt x y))
     ; Get the new tile
     ; Copy the tile here so that they don't share state
-    ; Lighting: dark, fog, lit
     (define new-tile 
       (let ([base-tile ((level-definition-tile-gen (hash-ref current-level 'gen)) seed x y)])
-        (make-thing base-tile
-          [lighting 'dark])))
+        (make-thing base-tile)))
     (hash-set! current-level (pt x y) new-tile) 
     
     ; NPCs and items are only on walkable tiles
@@ -123,11 +121,13 @@
 ; ===== Basic tile definitions =====
 
 (define-thing tile
-  [walkable #f]       ; if the player can walk on this tile
-  [solid #f]          ; if this tile blocks light
   [character #\space]
   [color "black"]
-  [items '()])
+  [items '()]
+  [lighting 'dark]    ; Dark: Invisible; Fog: Only show tile, not NPC or item; Lit: Everything
+  [walkable #f]       ; Can the player walk on this tile?
+  [solid #f]          ; Does this tile block light?
+  )
 
 (define-thing empty tile
   [walkable #t])
