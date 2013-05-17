@@ -165,20 +165,48 @@
     ; Update lighting
     (define/public (update-lighting)
       ; Turn any lit tiles to fog
-      ; Turn any tiles within the player's view limit to lit
-      (define player-location (thing-get player 'location))
-      (define player-view (thing-get player 'view-range 5))
       (for-tile
        (lambda (x y tile)
          (cond
-           ; Light tiles near the player
-           [(<= (distance player-location (pt x y)) player-view)
-            (thing-set! tile 'lighting 'lit)]
-           ; Fog previously lit tiles
-           [(eq? 'lit (thing-get tile 'lighting))
-            (thing-set! tile 'lighting 'fog)]
-           ; Otherwise do nothing
-           ))))
+           [(eq? 'lit (thing-get tile 'lighting 'dark))
+            (thing-set! tile 'lighting 'fog)])))
+      
+      ; Spread lighting from the player
+      ; x/y current tile to light
+      ; xd/yd direction to spread light:
+      ;  if xd != 0, spread to (x+xd y-1) (x+xd y) (x+xd y+1)
+      ;  if yd != 0, spread to (x-1 y+yd) (x y+yd) (x-1 y+yd)
+      ; spread is initially set to player's light radius
+      (define (spread-light x y xd yd spread)
+        ; Light the current tile
+        (define tile (get-tile x y))
+        (thing-set! tile 'lighting 'lit)
+        
+        ; Recur
+        (cond
+          ; Don't spread pass solid tiles (spread to them though)
+          ; Don't recur past the spread (vision range) value
+          [(or (<= spread 0) (thing-get tile 'solid #f))
+           (void)]
+          ; Spread in the x direction
+          [(not (= xd 0))
+           (spread-light (+ x xd) (- y 1) xd yd (- spread 1.41))
+           (spread-light (+ x xd) y       xd yd (- spread 1.00))
+           (spread-light (+ x xd) (+ y 1) xd yd (- spread 1.41))]
+          ; Spread in the y direction
+          [else
+           (spread-light (- x 1) (+ y yd) xd yd (- spread 1.41))
+           (spread-light x       (+ y yd) xd yd (- spread 1.00))
+           (spread-light (+ x 1) (+ y yd) xd yd (- spread 1.41))]))
+      
+      ; Spread in the four directions
+      (let ([player-x (pt-x (thing-get player 'location))]
+            [player-y (pt-y (thing-get player 'location))]
+            [player-v (thing-get player 'view-range 5)])
+        (spread-light player-x player-y -1  0 player-v)
+        (spread-light player-x player-y  1  0 player-v)
+        (spread-light player-x player-y  0 -1 player-v)
+        (spread-light player-x player-y  0  1 player-v)))
     
     ; Update: NPCs
     (define/public (update)
@@ -188,7 +216,7 @@
     (define/public (draw-npcs canvas)
       (for ([npc (in-list (get-npcs))])
         (define pt (recenter canvas (- (thing-get player 'location)
-                                        (thing-get npc 'location))))
+                                       (thing-get npc 'location))))
         (define tile (get-tile (pt-x pt) (pt-y pt)))
         
         ; Has to be on screen and lit

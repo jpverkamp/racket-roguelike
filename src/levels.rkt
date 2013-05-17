@@ -123,7 +123,8 @@
 ; ===== Basic tile definitions =====
 
 (define-thing tile
-  [walkable #f]
+  [walkable #f]       ; if the player can walk on this tile
+  [solid #f]          ; if this tile blocks light
   [character #\space]
   [color "black"]
   [items '()])
@@ -137,6 +138,7 @@
   [walkable #t])
 
 (define-thing wall tile
+  [solid #t]
   [character #\#]
   [color "white"])
 
@@ -145,6 +147,7 @@
   [color "blue"])
 
 (define-thing tree tile
+  [solid #t]
   [character #\u0005]
   [color "green"])
 
