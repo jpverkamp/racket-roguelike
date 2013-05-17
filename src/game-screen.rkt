@@ -4,12 +4,15 @@
  game-screen%)
 
 (require 
+ racket/draw
  "point.rkt"
  "screen.rkt"
  "noise/noise.rkt"
  "thing/thing.rkt"
  "entities.rkt"
  "world.rkt")
+
+(define gray-background (make-object color% 32 32 32))
 
 (define game-screen%
   (class screen%
@@ -37,7 +40,7 @@
            [(numpad8 #\w up)    (send world try-move player (+ (pt  0  1) (thing-get player 'location)))]
            [(numpad9)           (send world try-move player (+ (pt -1  1) (thing-get player 'location)))])
          
-         ; Update npcs
+         ; Update npcs and lighting
          (send world update)
          
          ; Check if the player is dead
@@ -55,18 +58,35 @@
       (define player (send world get-player))
       (send canvas clear)
       
+      ; Update lighting
+      (send world update-lighting)
+      
       ; Draw the tiles around the player
       (for* ([xi (in-range (send canvas get-width-in-characters))]
              [yi (in-range (send canvas get-height-in-characters))])
         (define x/y (recenter canvas (- (thing-get player 'location) (pt xi yi))))
         (define tile (send world tile-at (pt-x x/y) (pt-y x/y)))
+        (define lighting (thing-get tile 'lighting 'lit))
         (cond
+          ; Draw nothing on dark tiles
+          [(eq? lighting 'dark)
+           (void)]
+          ; If it's in fog, draw with a gray background
+          [(eq? lighting 'fog)
+           (send canvas write
+                 (thing-get tile 'character)
+                 xi
+                 yi
+                 (thing-get tile 'color)
+                 gray-background)]
+          ; If it's lit but there are no items, draw the tile
           [(null? (thing-get tile 'items '()))
            (send canvas write
                  (thing-get tile 'character)
                  xi
                  yi
                  (thing-get tile 'color))]
+          ; If it's lit and there are items, draw the item
           [else
            (send canvas write
                  (thing-get (car (thing-get tile 'items)) 'character)

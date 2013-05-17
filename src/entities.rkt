@@ -15,7 +15,8 @@
   [character #\x]
   [color "white"]
   [location (pt 0 0)]
-  [inventory '()])
+  [inventory '()]
+  [view-range 5])
 
 ; An enemy must have an act method
 ; It should mutate the world with it's updated state

@@ -6,6 +6,7 @@
 (define pt make-rectangular)
 (define pt-x real-part)
 (define pt-y imag-part)
+(define pt? complex?)
 
 ; Convert real coordinates to canvas coordinates
 (define (recenter canvas orig)

@@ -162,21 +162,44 @@
                  #:when (= p (thing-get entity 'location)))
         entity))
     
-    ; Update anything (for now, just NPCs)
+    ; Update lighting
+    (define/public (update-lighting)
+      ; Turn any lit tiles to fog
+      ; Turn any tiles within the player's view limit to lit
+      (define player-location (thing-get player 'location))
+      (define player-view (thing-get player 'view-range 5))
+      (for-tile
+       (lambda (x y tile)
+         (cond
+           ; Light tiles near the player
+           [(<= (distance player-location (pt x y)) player-view)
+            (thing-set! tile 'lighting 'lit)]
+           ; Fog previously lit tiles
+           [(eq? 'lit (thing-get tile 'lighting))
+            (thing-set! tile 'lighting 'fog)]
+           ; Otherwise do nothing
+           ))))
+    
+    ; Update: NPCs
     (define/public (update)
       (update-npcs this))
     
-    ; Draw any npcs
+    ; Draw any npcs (if lit)
     (define/public (draw-npcs canvas)
       (for ([npc (in-list (get-npcs))])
-        (define x/y (recenter canvas (- (thing-get player 'location)
+        (define pt (recenter canvas (- (thing-get player 'location)
                                         (thing-get npc 'location))))
-        (when (and (<= 0 (pt-x x/y) (sub1 (send canvas get-width-in-characters)))
-                   (<= 0 (pt-y x/y) (sub1 (send canvas get-height-in-characters))))
+        (define tile (get-tile (pt-x pt) (pt-y pt)))
+        
+        ; Has to be on screen and lit
+        (when (and (<= 0 (pt-x pt) (sub1 (send canvas get-width-in-characters)))
+                   (<= 0 (pt-y pt) (sub1 (send canvas get-height-in-characters)))
+                   (eq? 'lit (thing-get tile 'lighting 'dark)))
+          
           (send canvas write 
                 (thing-get npc 'character)
-                (pt-x x/y) 
-                (pt-y x/y)
+                (pt-x pt) 
+                (pt-y pt)
                 (thing-get npc 'color)))))
     
     (super-new)))

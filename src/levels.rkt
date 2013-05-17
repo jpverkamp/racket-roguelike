@@ -2,6 +2,7 @@
 
 (provide 
  get-tile
+ for-tile
  ascend
  descend
  get-npcs
@@ -43,6 +44,13 @@
     (hash-set! levels depth level))
   (hash-ref levels depth))
 
+; Loop over all generated tiles on the current level to update them
+; f : x y tile -> void
+(define (for-tile f)
+  (for ([(pt tile) (in-hash (get-level (current-depth)))]
+        #:when (pt? pt))
+    (f (pt-x pt) (pt-y pt) tile)))
+
 ; Ascend or descend to a (potentially) new level
 (define (ascend) (current-depth (+ (current-depth) 1)))
 (define (descend) (current-depth (- (current-depth) 1)))
@@ -77,8 +85,13 @@
   ; If the tile doesn't already exist, generate it
   (unless (hash-has-key? current-level (pt x y))
     ; Get the new tile
-    (define new-tile ((level-definition-tile-gen (hash-ref current-level 'gen)) seed x y))
-    (hash-set! current-level (pt x y) new-tile)
+    ; Copy the tile here so that they don't share state
+    ; Lighting: dark, fog, lit
+    (define new-tile 
+      (let ([base-tile ((level-definition-tile-gen (hash-ref current-level 'gen)) seed x y)])
+        (make-thing base-tile
+          [lighting 'dark])))
+    (hash-set! current-level (pt x y) new-tile) 
     
     ; NPCs and items are only on walkable tiles
     (when (thing-get new-tile 'walkable)
@@ -166,9 +179,7 @@
   (cond
     [water? (make-thing water)]
     [tree?  (make-thing tree)]
-    [else   (if (zero? (random 1000))
-                (make-thing stairs-down)
-                (make-thing grass))]))
+    [else   (if (zero? (random 1000)) stairs-down grass)]))
 
 ; Generate a simple cave with water and trees
 (define (shallow-cave seed x y)
@@ -179,9 +190,7 @@
     [wall?  (make-thing wall)]
     [water? (make-thing water)]
     [tree?  (make-thing tree)]
-    [else   (if (zero? (random 1000))
-                (make-thing stairs-down)
-                (make-thing empty))]))
+    [else   (if (zero? (random 1000)) stairs-down empty)]))
 
 ; ===== NPC generation routines =====
 
@@ -197,7 +206,7 @@
 
 ; Only basic items
 (define (base-items seed x y)
-  (when (zero? (random 100))
+  (when (zero? (random 1000))
     (case (random 4)
       [(0) (lookup *armors* "leather")]
       [(1) (lookup *weapons* "club")]
