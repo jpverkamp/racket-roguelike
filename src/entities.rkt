@@ -3,6 +3,7 @@
 (provide (all-defined-out))
 
 (require
+ "animate.rkt"
  "point.rkt"
  "thing/thing.rkt")
 
@@ -87,15 +88,43 @@
      ; Log message
      (send world log (format "~a explodes violently" (thing-get me 'name)))
 
+     ; Get the neighboring tiles
+     (define neighbors 
+       (for*/list ([xd (in-range -1 2)]
+                   [yd (in-range -1 2)])
+         (define loc (+ (thing-get me 'location) (pt xd yd)))
+         (send world tile-at (pt-x loc) (pt-y loc))))
+     
+     ; Store the original color
+     (for ([tile (in-list neighbors)])
+       (thing-set! tile 'original-color (thing-get tile 'color))
+       (thing-set! tile 'original-character (thing-get tile 'character))
+       (thing-set! tile 'character #\*))
+     
+     ; Animate through several colors
+     (define (random-color) (vector-ref (vector "red" "yellow" "white") (random 3)))
+     (for ([i (in-range 3)])
+       (animate!
+        (lambda ()
+          (for ([tile (in-list neighbors)])
+            (thing-set! tile 'color (random-color))
+            (sleep 0.01)))))
+     
+     ; Clear them 
+     (animate!
+      (lambda ()
+        (for ([tile (in-list neighbors)])
+          (thing-set! tile 'color (thing-get tile 'original-color))
+          (thing-set! tile 'character (thing-get tile 'original-character)))))
+     
      ; Damage neighbors
      (for* ([xd (in-range -1 2)]
             [yd (in-range -1 2)])
-       (for ([other (send world get-entities 
-                           (+ (thing-get me 'location)
-                              (pt xd yd)))])
+       (define loc (+ (thing-get me 'location) (pt xd yd)))
+       (for ([other (send world get-entities loc)])
          (unless (eqv? me other)
            (send world attack me other))))
-
+     
      ; Destroy self
      (thing-set! me 'health -1))])
    

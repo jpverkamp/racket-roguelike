@@ -42,7 +42,7 @@
         [(= depth 0) 
          (level-definition surface nothing nothing)]
         [else
-         (level-definition shallow-cave rats-only base-items)]))
+         (level-definition shallow-cave rats-and-bombs base-items)]))
     (hash-set! levels depth level))
   (hash-ref levels depth))
 
@@ -206,6 +206,11 @@
 (define (rats-only seed x y)
   (when (zero? (random 100))
     (lookup *entities* "rat")))
+
+; Rats and bombs
+(define (rats-and-bombs seed x y)
+  (when (zero? (random 75))
+    (lookup *entities* (if (zero? (random 2)) "rat" "bomb"))))
 
 ; ===== item generation routines =====
 
