@@ -215,19 +215,21 @@
     ; Draw any npcs (if lit)
     (define/public (draw-npcs canvas)
       (for ([npc (in-list (get-npcs))])
-        (define pt (recenter canvas (- (thing-get player 'location)
-                                       (thing-get npc 'location))))
+        (define pt (thing-get npc 'location))
+        (define draw-pt (recenter canvas (- (thing-get player 'location)
+                                            (thing-get npc 'location))))
+        
         (define tile (get-tile (pt-x pt) (pt-y pt)))
         
         ; Has to be on screen and lit
-        (when (and (<= 0 (pt-x pt) (sub1 (send canvas get-width-in-characters)))
-                   (<= 0 (pt-y pt) (sub1 (send canvas get-height-in-characters)))
+        (when (and (<= 0 (pt-x draw-pt) (sub1 (send canvas get-width-in-characters)))
+                   (<= 0 (pt-y draw-pt) (sub1 (send canvas get-height-in-characters)))
                    (eq? 'lit (thing-get tile 'lighting 'dark)))
           
           (send canvas write 
                 (thing-get npc 'character)
-                (pt-x pt) 
-                (pt-y pt)
+                (pt-x draw-pt) 
+                (pt-y draw-pt)
                 (thing-get npc 'color)))))
     
     (super-new)))
