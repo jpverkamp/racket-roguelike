@@ -8,7 +8,8 @@
  racket/draw
  "ascii-canvas/ascii-canvas.rkt"
  "screen.rkt"
- "main-menu-screen.rkt")
+ "main-menu-screen.rkt"
+ "animate.rkt")
 
 ; Create a new GUI.
 (define gui%
@@ -43,8 +44,7 @@
                   (cond
                     ; If it's still a valid screen, redraw it
                     [(is-a? active-screen screen%)
-                     (send active-screen draw this)
-                     (send frame refresh)]
+                     (animate!)]
                     ; Otherwise, exit the program
                     [else
                      (exit)])]))
@@ -55,6 +55,14 @@
               [width-in-characters width-in-chars]
               [height-in-characters height-in-chars]))))
     
+    ; Correctly set the animation function
+    (set-animate!
+      (lambda thunks 
+        (for-each (lambda (thunk) (thunk)) thunks)
+        (send active-screen draw canvas)
+        (send frame refresh)
+        (yield)))
+    
     ; The active screen
     (define active-screen (new main-menu-screen%))
 
@@ -62,8 +70,7 @@
     (send frame show #t)
     
     ; Do the initial drawing
-    (send active-screen draw canvas)
-    (send frame refresh)
+    (animate!)
     
     ; Finish initilization.
     (super-new)))

@@ -9,11 +9,13 @@
  update-npcs)
 
 (require
+ (only-in racket/gui queue-callback)
  "point.rkt"
  "entities.rkt"
  "items.rkt"
  "noise/noise.rkt"
- "thing/thing.rkt")
+ "thing/thing.rkt"
+ "animate.rkt")
 
 ; Level defintions
 ; tile-gen : x y -> tile
