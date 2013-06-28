@@ -42,7 +42,9 @@
         [(= depth 0) 
          (level-definition surface nothing nothing)]
         [else
-         (level-definition shallow-cave rats-and-bombs base-items)]))
+         (case (random 2)
+           [(0) (level-definition shallow-cave rats-and-bombs base-items)]
+           [(1) (level-definition daedalus maze-baddies base-items)])]))
     (hash-set! levels depth level))
   (hash-ref levels depth))
 
@@ -197,6 +199,43 @@
     [tree?  (make-thing tree)]
     [else   (if (zero? (random 1000)) stairs-down empty)]))
 
+; Generate a series of straight lines
+(define (daedalus seed x y)
+  ; Guaranteed wall if not x or y = 5 +- 1 (mod 10)
+  (define maybe-hall?
+    (or (<= 4 (remainder (abs x) 10) 6)
+        (<= 4 (remainder (abs y) 10) 6)))
+  
+  ; Maybe a stairway if both are five
+  (define maybe-stairs?
+    (= 5 (remainder (abs x) 10) (remainder (abs y) 10)))
+  
+  ; Find the endpoints
+  (define xlo (floor (/ x 10)))
+  (define ylo (floor (/ y 10)))
+  
+  ; Calculate if we'd have an open space
+  (define good-hall?
+    (or (and (> (simplex (* 0.5 xlo)       (* 0.5 ylo)       seed) -0.25)
+             (> (simplex (* 0.5 (+ xlo 1)) (* 0.5 ylo)       seed) -0.25))
+        (and (> (simplex (* 0.5 xlo)       (* 0.5 ylo)       seed) -0.25)
+             (> (simplex (* 0.5 xlo)       (* 0.5 (+ ylo 1)) seed) -0.25))))
+  
+  ; Figure out which case we have
+  (cond
+    ; Central section
+    [(and (<= -3 x 3) (<= -3 y 3))
+     (make-thing empty)]
+    ; Guaranteed path
+    [(and maybe-hall? good-hall?) 
+     ; Check for stairs
+     (if (and maybe-stairs? (zero? (random 10)))
+         (make-thing stairs-down)
+         (make-thing empty))]
+    ; Wall
+    [else
+     (make-thing wall)]))
+
 ; ===== NPC generation routines =====
 
 ; No NPCs (also works for items)
@@ -211,6 +250,17 @@
 (define (rats-and-bombs seed x y)
   (when (zero? (random 75))
     (lookup *entities* (if (zero? (random 2)) "rat" "bomb"))))
+
+; Maze baddies
+(define (maze-baddies seed x y)
+  (when (zero? (random 75))
+    (case (random 5)
+      [(0) 
+       (lookup *entities* "minotaur")]
+      [(1 2 3)
+       (lookup *entities* "rat")]
+      [(4)
+       (lookup *entities* "spider")])))
 
 ; ===== item generation routines =====
 

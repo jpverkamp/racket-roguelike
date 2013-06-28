@@ -141,7 +141,38 @@
      [name "rat"]
      [character #\r]
      [color "brown"])
-
+   
+   (make-thing seeking-enemy
+     [name "minotaur"]
+     [character #\M]
+     [color "brown"])
+   
+   (make-thing fleeing-enemy
+     [name "spider"]
+     [character #\s]
+     [color "silver"]
+     [(act me world)
+      (define loc (thing-get me 'location))
+      (define tile (send world tile-at (pt-x loc) (pt-y loc)))
+      
+      ; Try to move
+      (thing-call seeking-enemy 'act me world)
+      
+      ; Check if we did (the old location is now empty)      
+      ; If so, make that tile a web that fades when walked on
+      (when (null? (send world get-entities loc))
+        (define old-tile (make-thing tile))
+        
+        (thing-set! tile 'character (integer->char 206))
+        (thing-set! tile 'color "silver")
+        (thing-set! tile 'solid #t)
+        
+        (thing-set! tile 'on-enter
+          (lambda (entity world)
+            (for ([key (in-list '(character color lighting walkable solid))])
+              (thing-set! tile key (thing-get old-tile key))
+              (thing-set! tile 'on-enter (lambda _ (void)))))))])
+   
    (make-thing seeking-enemy
      [name "goblin"]
      [character #\g]
