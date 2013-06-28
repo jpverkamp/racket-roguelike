@@ -8,3 +8,5 @@ A tutorial series on writing a Roguelike in Racket.
 * [Racket Roguelike 5: Armors and weapons and potions, oh my!](http://blog.jverkamp.com/2013/05/02/racket-roguelike-5-armors-and-weapons-and-potions-oh-my/)
 * [Racket Roguelike 6: Dig deeper!](http://blog.jverkamp.com/2013/05/10/racket-roguelike-6-dig-deeper/)
 * [Racket Roguelike 7: Into darkness!](http://blog.jverkamp.com/2013/05/17/racket-roguelike-7-into-darkness/)
+* [Racket Roguelike 8: A million words!](http://blog.jverkamp.com/2013/06/21/racket-roguelike-8-a-million-words/)
+* [Racket Roguelike 9: Daedalus' wrath!](http://blog.jverkamp.com/2013/06/28/racket-roguelike-9-daedalus-wrath/)
