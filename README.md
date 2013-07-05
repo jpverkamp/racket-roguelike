@@ -10,3 +10,4 @@ A tutorial series on writing a Roguelike in Racket.
 * [Racket Roguelike 7: Into darkness!](http://blog.jverkamp.com/2013/05/17/racket-roguelike-7-into-darkness/)
 * [Racket Roguelike 8: A million words!](http://blog.jverkamp.com/2013/06/21/racket-roguelike-8-a-million-words/)
 * [Racket Roguelike 9: Daedalus' wrath!](http://blog.jverkamp.com/2013/06/28/racket-roguelike-9-daedalus-wrath/)
+* [Racket Roguelike 10: Levels via automata!](http://blog.jverkamp.com/2013/07/05/racket-roguelike-10-levels-via-automata/)
