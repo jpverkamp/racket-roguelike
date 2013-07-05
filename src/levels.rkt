@@ -40,11 +40,14 @@
     (hash-set! level 'gen
       (cond
         [(= depth 0) 
+         bugs
          (level-definition surface nothing nothing)]
         [else
-         (case (random 2)
+         (case (random 4)
            [(0) (level-definition shallow-cave rats-and-bombs base-items)]
-           [(1) (level-definition daedalus maze-baddies base-items)])]))
+           [(1) (level-definition daedalus maze-baddies base-items)]
+           [(2) (level-definition cellular goblin-warren base-items)]
+           [(3) (level-definition bugs goblin-warren base-items)])]))
     (hash-set! levels depth level))
   (hash-ref levels depth))
 
@@ -236,6 +239,78 @@
     [else
      (make-thing wall)]))
 
+; Use a cellular automaton to generate levels
+(define (cellular seed x y)
+  ; Get the current level
+  (define current-level (get-level (current-depth)))
+  
+  ; Helper to count neighboring grass tiles
+  (define (grass? at) 
+    (eq? #\. (thing-get (hash-ref current-level at empty) 'character #\space)))
+  (define (count at)
+    (for*/sum ([xi (in-range -1 2)] 
+               [yi (in-range -1 2)]
+               #:unless (= 0 xi yi))
+      (if (grass? (+ at (pt xi yi))) 1 0)))
+  
+  ; Now randomly set some percentage of the surrounding tiles
+  (define region-size 10)
+  
+  ; Clear the area first
+  (for* ([xi (in-range (- x region-size) (+ x region-size 1))]
+         [yi (in-range (- y region-size) (+ y region-size 1))])
+    (hash-set! current-level (pt xi yi) (make-thing wall)))
+  
+  ; Set the center tile
+  (hash-set! current-level (pt x y) (make-thing grass))
+  
+  ; Random grow
+  (for ([i (in-range (* region-size region-size region-size))])
+    ; Choose a random point from the nearby area
+    (define new-pt (+ (pt x y)
+                      (pt (- (random (* region-size 2)) region-size)
+                          (- (random (* region-size 2)) region-size))))
+    
+    ; Set the new tile if we have 3 or less neighbors
+    ; And this tile hasn't already been set
+    ; Some become stairs instead
+    (when (<= 1 (count new-pt) 2)
+      (hash-set! current-level new-pt 
+                 (if (zero? (random 100))
+                     (make-thing stairs-up)
+                     (make-thing grass)))))
+  
+  ; Return our tile
+  (hash-ref current-level (pt x y))) 
+
+; Generate levels using skittering bugs
+(define (bugs seed x y)
+  (define current-level (get-level (current-depth)))
+  
+  ; When a tile is requested, spread out from it for a while
+  (let loop ([i 0] [x x] [y y])
+    (define at (pt x y))
+    
+    ; Clear unset neighbors
+    (for* ([xi (in-range -1 2)] [yi (in-range -1 2)])
+      (define ati (+ at (pt xi yi)))
+      (when (not (hash-has-key? current-level ati))
+        (hash-set! current-level ati (make-thing wall))))
+    
+    ; Set the current tile
+    (hash-set! current-level at 
+               (if (zero? (random 100))
+                   (make-thing stairs-up)
+                   (make-thing grass)))
+    
+    ; Wonder around
+    (when (< i 10)
+      (loop (+ i 1) (+ x (random 3) -1) (+ y (random 3) -1))))
+  
+  ; Return the tile
+  (hash-ref current-level (pt x y)))
+                 
+
 ; ===== NPC generation routines =====
 
 ; No NPCs (also works for items)
@@ -261,6 +336,11 @@
        (lookup *entities* "rat")]
       [(4)
        (lookup *entities* "spider")])))
+
+; Goblins
+(define (goblin-warren seed x y)
+  (when (zero? (random 100))
+    (lookup *entities* "goblin")))
 
 ; ===== item generation routines =====
 
