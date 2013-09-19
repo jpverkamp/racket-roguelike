@@ -5,9 +5,9 @@
 
 (require 
  racket/draw
+ noise
  "point.rkt"
  "screen.rkt"
- "noise/noise.rkt"
  "thing/thing.rkt"
  "entities.rkt"
  "world.rkt")

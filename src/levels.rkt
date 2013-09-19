@@ -9,11 +9,11 @@
  update-npcs)
 
 (require
+ noise
  (only-in racket/gui queue-callback)
  "point.rkt"
  "entities.rkt"
  "items.rkt"
- "noise/noise.rkt"
  "thing/thing.rkt"
  "animate.rkt")
 
