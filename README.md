@@ -11,3 +11,8 @@ A tutorial series on writing a Roguelike in Racket.
 * [Racket Roguelike 8: A million words!](http://blog.jverkamp.com/2013/06/21/racket-roguelike-8-a-million-words/)
 * [Racket Roguelike 9: Daedalus' wrath!](http://blog.jverkamp.com/2013/06/28/racket-roguelike-9-daedalus-wrath/)
 * [Racket Roguelike 10: Levels via automata!](http://blog.jverkamp.com/2013/07/05/racket-roguelike-10-levels-via-automata/)
+
+If you are using the HEAD, the [https://github.com/jpverkamp/noise](noise) module has been converted into a
+Racket package. You will need to install it:
+
+    raco pkg install github://github.com/jpverkamp/noise/master
