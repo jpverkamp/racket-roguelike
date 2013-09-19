@@ -12,7 +12,10 @@ A tutorial series on writing a Roguelike in Racket.
 * [Racket Roguelike 9: Daedalus' wrath!](http://blog.jverkamp.com/2013/06/28/racket-roguelike-9-daedalus-wrath/)
 * [Racket Roguelike 10: Levels via automata!](http://blog.jverkamp.com/2013/07/05/racket-roguelike-10-levels-via-automata/)
 
-If you are using the HEAD, the [https://github.com/jpverkamp/noise](noise) module has been converted into a
-Racket package. You will need to install it:
+If you are using the HEAD, the [https://github.com/jpverkamp/ascii-canvas](ascii-canvas), 
+[https://github.com/jpverkamp/noise](noise), and [https://github.com/jpverkamp/thing](thing)
+modules have been converted into Racket packages. You will need to install them:
 
+    raco pkg install github://github.com/jpverkamp/ascii-canvas/master
     raco pkg install github://github.com/jpverkamp/noise/master
+    raco pkg install github://github.com/jpverkamp/thing/master
