@@ -10,11 +10,11 @@
 
 (require
  noise
+ thing
  (only-in racket/gui queue-callback)
  "point.rkt"
  "entities.rkt"
  "items.rkt"
- "thing/thing.rkt"
  "animate.rkt")
 
 ; Level defintions

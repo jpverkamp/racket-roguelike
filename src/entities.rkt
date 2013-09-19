@@ -3,9 +3,9 @@
 (provide (all-defined-out))
 
 (require
+ thing
  "animate.rkt"
- "point.rkt"
- "thing/thing.rkt")
+ "point.rkt")
 
 ; All entities have:
 ; - a location on the map

@@ -6,7 +6,7 @@
 (require
  racket/gui
  racket/draw
- "ascii-canvas/ascii-canvas.rkt"
+ ascii-canvas
  "screen.rkt"
  "main-menu-screen.rkt"
  "animate.rkt")

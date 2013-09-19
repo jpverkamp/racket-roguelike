@@ -3,8 +3,8 @@
 (provide (all-defined-out))
 
 (require
- "point.rkt"
- "thing/thing.rkt")
+ thing
+ "point.rkt")
 
 ; All items have:
 ; - a display char/item if they're on the ground

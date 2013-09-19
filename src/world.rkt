@@ -3,11 +3,11 @@
 (provide world%)
 
 (require 
+ thing
  "point.rkt"
  "entities.rkt"
  "items.rkt"
- "levels.rkt"
- "thing/thing.rkt")
+ "levels.rkt")
 
 ; Choose a random element from a vector
 (define (vector-choose-random v)
